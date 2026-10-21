@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Report</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style> 
+        body { font-family: 'Sarabun', sans-serif; } 
+        
+        #page-allLevelsSimple table {
+            font-size: 0.875rem !important;
+        }
+
+        #page-allLevelsSimple .note-warn, 
+        #page-allLevelsSimple .note-info {
+            font-size: 0.875rem !important;
+        }
+
+        #page-allLevelsSimple .overflow-x-auto {
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        #page-allLevelsSimple thead tr {
+            position: sticky;
+            z-index: 40;
+            background-color: #0b2265 !important;
+        }
+        #page-allLevelsSimple thead tr:nth-child(1) {
+            top: 0px;
+        }
+        #page-allLevelsSimple thead tr:nth-child(2) {
+            top: 37px;
+        }
+        #page-allLevelsSimple thead th {
+            background-color: #0b2265 !important;
+        }
+
+        #page-allLevelsSimple tr.lvl-region td {
+            position: sticky;
+            top: 70px;
+            z-index: 30;
+            background-color: #D4E7F3;
+        }
+
+        #page-allLevelsSimple tr.lvl-center td {
+            position: sticky;
+            top: 108px;
+            z-index: 20;
+            background-color: #E7F1F9 !important;
+        }
+
+        #page-allLevelsSimple tr.lvl-region:hover td {
+            background-color: #c2dcf0 !important;
+        }
+        #page-allLevelsSimple tr.lvl-center:hover td {
+            background-color: #d3e5f5 !important;
+        }
+
+        table.simple-table {
+            border-collapse: separate;
+            border-spacing: 0;
+            width: 100%;
+        }
+        table.simple-table th,
+        table.simple-table td {
+            border-left: none !important;
+            border-right: none !important;
+            border-top: none !important;
+            border-bottom: 1px solid rgba(11, 34, 101, 0.2) !important;
+        }
+        .simple-page thead th {
+            color: #fff !important;
+            font-weight: 600;
+            border-bottom: 1px solid #0b2265 !important;
+            box-shadow: none !important;
+        }
+        .simple-page tbody tr {
+            transition: background-color .12s ease;
+        }
+
+        .simple-page tr.lvl-summary:hover td { background-color: #c4c8d5 !important; }
+        .simple-page tr.lvl-region:hover td  { background-color: #c2dcf0 !important; }
+        .simple-page tr.lvl-center:hover td  { background-color: #047dc2 !important; }
+        .simple-page tr.lvl-unit:hover td    { background-color: #eaecef !important; }
+        .simple-page tr.lvl-agent:hover td   { background-color: #f1f5f9 !important; }
+
+        .simple-page .name-cell {
+            position: relative;
+            padding-left: 1.25rem !important;
+        }
+        .simple-page .name-cell::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 6px; bottom: 6px;
+            width: 4px;
+            border-radius: 4px;
+            background: var(--accent, transparent);
+        }
+
+        .simple-page tr.lvl-summary td { background-color: #D5D8E2 !important; color: #0b2265 !important; font-weight: 800; }
+        .simple-page tr.lvl-summary td.name-cell { padding-left: 1rem !important; }
+        .simple-page tr.lvl-summary td.name-cell::before { display: none; }
+
+        .simple-page tr.lvl-region td { background-color: #D4E7F3 !important; padding-top: .5rem !important; padding-bottom: .5rem !important; }
+        .simple-page tr.lvl-region td.name-cell { --accent: #047dc2; font-weight: 700; color: #0b2265; }
+
+        .simple-page tr.lvl-center td { background-color: #E7F1F9 !important; }
+        .simple-page tr.lvl-center td.name-cell { --accent: #7cbadf; padding-left: 2rem !important; font-weight: 600; color: #0b2265; }
+
+        .simple-page tr.lvl-unit td { background-color: #F5F6F9 !important; }
+        .simple-page tr.lvl-unit td.name-cell { --accent: #CBD5E1; padding-left: 2.75rem !important; font-weight: 500; color: #0b2265; }
+
+        .simple-page tr.lvl-agent td { background-color: #fff !important; }
+        .simple-page tr.lvl-agent td.name-cell { padding-left: 3.5rem !important; font-weight: 400; color: #0b2265; font-size: .85rem; }
+
+        .simple-page .pill {
+            display: inline-block;
+            padding: 1px 10px;
+            border-radius: 9999px;
+            white-space: nowrap;
+            font-size: 0.875rem !important;
+        }
+        .simple-page .pill-ok { background: #ecfdf5; color: #047857; }
+        .simple-page .pill-warn { background: #fef2f2; color: #b91c1c; }
+        .simple-page .pill-red { color: #b91c1c; }
+        .simple-page .pill-neutral {
+            background: #eff6ff;
+            color: #1d4ed8;
+            border-radius: 6px;
+            padding: 2px 4px;
+            font-size: 0.6rem !important;
+        }
+        .simple-page .note-warn {
+            color: #b91c1c;
+            background: #fef2f2;
+            border-radius: 8px;
+            padding: 2px 10px;
+            display: inline-block;
+            white-space: nowrap !important;
+        }
+        .simple-page .note-info {
+            color: #047857;
+            background: #ecfdf5;
+            border-radius: 8px;
+            padding: 2px 10px;
+            display: inline-block;
+            white-space: nowrap !important;
+        }
+        .simple-page .num { font-variant-numeric: tabular-nums; }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800 flex min-h-screen relative overflow-x-hidden">
+
+    <button id="open-sidebar-btn" onclick="toggleSidebar()" class="hidden fixed top-4 left-4 z-50 text-gray-700 p-1 rounded-lg shadow-lg hover:bg-gray-100 transition">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"/></svg>
+    </button>
+
+    <aside id="sidebar" class="bg-[#047dc2] p-4 shadow-md w-56 flex-shrink-0 min-h-screen sticky top-0 transition-all duration-300 z-30 flex flex-col justify-between">
+        <div class="space-y-4">
+            <div>
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <div class="w-16 h-16 rounded-xl overflow-hidden flex items-center justify-center p-1 flex-shrink-0">
+                            <img src="https://i.ibb.co/wFGzSJWT/Logo98-New-Wh.png" alt="Logo" class="w-full h-full object-contain">
+                        </div>
+                        <h1 class="font-bold text-white text-lg">Daily Report</h1>
+                    </div>
+                    <button onclick="toggleSidebar()" class="p-1.5 hover:bg-white/10 rounded-lg transition text-white">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"/></svg>
+                    </button>
+                </div>
+                <p id="sidebar-date" class="font-semibold text-gray-300 text-xs mt-1">กำลังโหลด...</p>
+            </div>
+
+            <div>
+                <div class="space-y-2">
+                    <button onclick="switchTab('ranking')" id="btn-ranking" class="w-full flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium transition-colors text-gray-300 hover:bg-[#273482]/30 border border-white/40">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                        </svg>
+                        <span>จัดอันดับ</span>
+                    </button>
+                    <button onclick="switchTab('allLevelsSimple')" id="btn-allLevelsSimple" class="w-full flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium transition-colors bg-[#273482] text-white border border-white/40">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                        </svg>
+                        <span>สรุปผลงาน</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="pt-2 mb-auto">
+            <button onclick="reloadData()" id="btn-reload" class="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-medium transition-colors text-gray-300 hover:bg-[#273482]/30 border border-white/10">
+                <svg id="reload-icon" class="w-4 h-4 transition-transform duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h5M20 20v-5h-5M4.5 9A7.5 7.5 0 0119 7.5M19.5 15A7.5 7.5 0 015 16.5"/>
+                </svg>
+                <span id="reload-label">Reload</span>
+            </button>
+        </div>
+    </aside>
+
+    <main id="main-content" class="flex-1 p-6 transition-all duration-300 min-w-0">
+
+        <!-- หน้า: จัดอันดับ -->
+        <div id="page-ranking" class="hidden w-full flex-col min-h-[calc(100vh-3rem)]">
+            <div class="bg-white p-5 rounded-xl shadow space-y-6 flex-1 flex flex-col">
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center pb-6 border-b border-gray-100">
+                    <div class="relative flex flex-col items-center justify-center md:col-span-4 border-b md:border-b-0 md:border-r border-gray-100 pb-4 md:pb-0">
+                        <h3 id="gauge-title-date" class="text-red-500 font-semibold text-xl mb-3">วันที่ -</h3>
+                        <div class="relative w-full h-40 flex items-center justify-center">
+                            <canvas id="gaugeChart" class="max-h-full"></canvas>
+                            <div class="absolute inset-x-0 bottom-1 flex flex-col items-center justify-center text-center">
+                                <span id="val-n2" class="text-2xl font-bold text-[#273482] leading-tight">0%</span>  
+                                <span id="val-i2-gauge" class="text-xl font-semibold text-[#047dc2] leading-loose">0</span>     
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex flex-col justify-center space-y-3 md:col-span-3 border-b md:border-b-0 md:border-r border-gray-100 pb-4 md:pb-0 md:pr-4">
+                        <div class="bg-amber-50 p-2.5 rounded-lg border-l-4 border-amber-500">
+                            <p class="text-xs font-medium text-gray-600">เบี้ยไม่คิดผลงาน</p>
+                            <p id="val-j2" class="text-xl font-bold text-amber-700">0</p>
+                        </div>
+                        <div class="bg-gray-50 p-2.5 rounded-lg border-l-4 border-gray-500">
+                            <p class="text-xs font-medium text-gray-600">ฐานเบี้ยปีแรก</p>
+                            <p id="val-m2" class="text-xl font-bold text-gray-700">0</p>
+                        </div>
+                        <div class="bg-blue-50 p-2.5 rounded-lg border-l-4 border-blue-600">
+                            <p class="text-xs font-medium text-gray-600">เบี้ยปีต่อไป</p>
+                            <p id="val-k2" class="text-xl font-bold text-blue-900">0</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-start space-x-3 md:col-span-5">
+                        <div class="w-40 h-40 flex-shrink-0">
+                            <canvas id="pieChart"></canvas>
+                        </div>
+                        <div id="pie-legend-custom" class="flex flex-col justify-center space-y-1.5 text-sm overflow-hidden flex-1"></div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 gap-6">
+                    <div>
+                        <h3 class="text-lg font-bold text-[#273482] mb-3">ภาค : 3 อันดับแรก</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <h4 class="text-base font-bold text-gray-700 mb-2">เบี้ยปีแรก</h4>
+                                <div id="table-regionPremium" class="overflow-x-auto"></div>
+                            </div>
+                            <div>
+                                <h4 class="text-base font-bold text-gray-700 mb-2">คอมมิชชั่น</h4>
+                                <div id="table-regionCommission" class="overflow-x-auto"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="border-t pt-4">
+                        <h3 class="text-lg font-bold text-[#273482] mb-3">ศูนย์ : 5 อันดับแรก</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <h4 class="text-base font-bold text-gray-700 mb-2">เบี้ยปีแรก</h4>
+                                <div id="table-centerPremium" class="overflow-x-auto"></div>
+                            </div>
+                            <div>
+                                <h4 class="text-base font-bold text-gray-700 mb-2">คอมมิชชั่น</h4>
+                                <div id="table-centerCommission" class="overflow-x-auto"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="border-t pt-4">
+                        <h3 class="text-lg font-bold text-[#273482] mb-3">หน่วย : 10 อันดับแรก</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <h4 class="text-base font-bold text-gray-700 mb-2">เบี้ยปีแรก</h4>
+                                <div id="table-unitPremium" class="overflow-x-auto"></div>
+                            </div>
+                            <div>
+                                <h4 class="text-base font-bold text-gray-700 mb-2">คอมมิชชั่น</h4>
+                                <div id="table-unitCommission" class="overflow-x-auto"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- หน้า: ทุกระดับ (สรุปผลงาน) -->
+        <div id="page-allLevelsSimple" class="simple-page flex w-full flex-col min-h-[calc(100vh-3rem)]">
+            <section class="bg-white p-5 rounded-xl shadow w-full flex flex-col flex-1">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-3 no-print">
+                    <div id="alllevels-simple-table-title" class="text-l font-bold text-[#273482]">
+                        ฝ่ายขยายงานภูมิภาค 98 -
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
+                        <div class="relative">
+                            <select id="select-region-allLevelsSimple" onchange="handleFilterChange('allLevelsSimple')" class="py-1.5 px-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#047dc2] bg-white text-gray-700 font-medium">
+                                <option value="">ทุกสังกัด (ทุกภาค)</option>
+                            </select>
+                        </div>
+                        <div class="relative flex-1 md:w-50">
+                            <input type="text" id="search-allLevelsSimple" placeholder="ค้นหาจากชื่อ..." oninput="handleFilterChange('allLevelsSimple')" class="w-full pl-9 pr-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#047dc2]">
+                            <svg class="w-4 h-4 text-gray-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                        </div>
+                        <div class="flex items-center gap-1.5 flex-wrap">
+                            <label class="inline-flex items-center text-xs font-medium cursor-pointer bg-blue-50 px-2.5 py-1.5 rounded-lg border border-blue-100"><input type="checkbox" value="center" checked onchange="handleFilterChange('allLevelsSimple')" class="al-filter-chk mr-1.5 rounded text-[#047dc2] focus:ring-0">ศูนย์</label>
+                            <label class="inline-flex items-center text-xs font-medium cursor-pointer bg-blue-50 px-2.5 py-1.5 rounded-lg border border-blue-100"><input type="checkbox" value="unit" checked onchange="handleFilterChange('allLevelsSimple')" class="al-filter-chk mr-1.5 rounded text-[#047dc2] focus:ring-0">หน่วย</label>
+                            <label class="inline-flex items-center text-xs font-medium cursor-pointer bg-blue-50 px-2.5 py-1.5 rounded-lg border border-blue-100"><input type="checkbox" value="agent" checked onchange="handleFilterChange('allLevelsSimple')" class="al-filter-chk mr-1.5 rounded text-[#047dc2] focus:ring-0">ตัวแทน</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="overflow-x-auto w-full flex-1">
+                    <table class="w-full text-sm simple-table min-w-[900px]">
+                        <thead id="alllevels-simple-table-head"></thead>
+                        <tbody id="alllevels-simple-table-body"></tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+
+    </main>
+
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const openBtn = document.getElementById('open-sidebar-btn');
+            
+            if (sidebar.style.display === 'none') {
+                sidebar.style.display = 'flex';
+                openBtn.classList.add('hidden');
+            } else {
+                sidebar.style.display = 'none';
+                openBtn.classList.remove('hidden');
+            }
+        }
+
+        function formatThaiDate(dateStr) {
+            if (!dateStr) return '-';
+            let parts = dateStr.split('/');
+            if (parts.length !== 3) return dateStr;
+            let day = parseInt(parts[0], 10);
+            let month = parseInt(parts[1], 10);
+            let year = parts[2];
+            const thaiMonths = ["", "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
+            return (month >= 1 && month <= 12) ? `${day} ${thaiMonths[month]} ${year}` : dateStr;
+        }
+
+        function formatShortThaiDate(dateStr) {
+            if (!dateStr) return '-';
+            let parts = dateStr.split('/');
+            if (parts.length !== 3) return dateStr;
+            let day = parseInt(parts[0], 10);
+            let month = parseInt(parts[1], 10);
+            let year = parseInt(parts[2], 10);
+            
+            // แปลงปี ค.ศ. หรือ พ.ศ. ให้เป็นปี พ.ศ. ย่อ 2 หลัก (เช่น 2026 หรือ 2569 -> 69)
+            let shortYear = year;
+            if (year > 2500) {
+                shortYear = year - 2500;
+            } else if (year > 2000) {
+                shortYear = (year + 543) - 2500;
+            } else if (year > 100) {
+                shortYear = year % 100;
+            }
+
+            const thaiMonthsShort = ["", "ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+            return (month >= 1 && month <= 12) ? `${day} ${thaiMonthsShort[month]} ${shortYear}` : dateStr;
+        }
+
+        function getFirstName(fullName) {
+            if (!fullName) return '';
+            let cleaned = String(fullName).trim();
+            cleaned = cleaned.replace(/^[0-9]+\s*/, '');
+            let parts = cleaned.split(/\s+/);
+            return parts[0] || cleaned;
+        }
+
+        function switchTab(tabName) {
+            document.getElementById('page-ranking').classList.add('hidden');
+            document.getElementById('page-ranking').classList.remove('flex');
+
+            document.getElementById('page-allLevelsSimple').classList.add('hidden');
+            document.getElementById('page-allLevelsSimple').classList.remove('flex');
+
+            document.getElementById('btn-ranking').className = 'w-full flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium transition-colors text-gray-300 hover:bg-[#273482]/30 border border-white/40';
+            document.getElementById('btn-allLevelsSimple').className = 'w-full flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium transition-colors text-gray-300 hover:bg-[#273482]/30 border border-white/40';
+            
+            let activePage = document.getElementById('page-' + tabName);
+            activePage.classList.remove('hidden');
+            activePage.classList.add('flex');
+            
+            document.getElementById('btn-' + tabName).className = 'w-full flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium transition-colors bg-[#273482] text-white border border-white/40';
+        }
+
+        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxYS9yPNhMDgJEpRxv4buuj9oYw4ZwRgvNJQHc-0hPfV3gKT5zxb3f_ehjwz5ce5F9v/exec';
+        const CACHE_KEY = 'report98_cache_v3';
+
+        function fetchAllData(noStore) {
+            const opt = noStore ? { cache: 'no-store' } : undefined;
+            return fetch(WEB_APP_URL, opt).then(r => r.json());
+        }
+
+        let gaugeChartInstance = null;
+        let pieChartInstance = null;
+        let i2Val = 0, j2Val = 0, k2Val = 0, m2Val = 0, n2Val = 0;
+        let globalLatestData = null;
+
+        function cleanNumber(val) {
+            if (typeof val === 'number') return val;
+            if (!val) return 0;
+            let num = Number(String(val).replace(/,/g, ''));
+            return isNaN(num) ? 0 : num;
+        }
+
+        function formatComplianceCell(levelType, val) {
+            if (levelType === 'agent') return '-';
+            if (val === undefined || val === null || String(val).trim() === '') return '';
+            let num = Number(String(val).replace(/,/g, '').replace(/%/g, '').trim());
+            if (isNaN(num)) return String(val);
+
+            let formattedText = num.toFixed(2);
+            let isRed = num < 75;
+
+            if (isRed) {
+                return `<span class="pill pill-warn">${formattedText}</span>`;
+            }
+            return `<span class="pill pill-ok">${formattedText}</span>`;
+        }
+
+        const CENTER_INCENTIVE_TIERS = [
+            { min: 15000, max: 30000, target: 30000, pct: 20 },
+            { min: 30000, max: 60000, target: 60000, pct: 25 },
+            { min: 60000, max: 120000, target: 120000, pct: 30 },
+        ];
+        const UNIT_INCENTIVE_TIERS = [
+            { min: 2500, max: 5000, target: 5000, pct: 25 },
+            { min: 5000, max: 10000, target: 10000, pct: 35 },
+        ];
+
+        function commissionNote(comm, minThreshold, shortLabel, tiers) {
+            if (comm < minThreshold) {
+                return { cls: 'note-warn', text: `เพิ่มคอม ${(minThreshold - comm).toLocaleString()} ${shortLabel}` };
+            }
+            for (const t of tiers) {
+                if (comm >= t.min && comm < t.max) {
+                    return { cls: 'note-info', text: `เพิ่มคอม ${(t.target - comm).toLocaleString()} → ค่าจัดงาน ${t.pct}%` };
+                }
+            }
+            return null;
+        }
+
+        function populateRegionDropdowns(rows) {
+            let regionNames = [];
+            rows.forEach(row => {
+                if (row[0] === "ภาค" || row[0] === "ภาค(GL)") {
+                    if (row[2] && !regionNames.includes(row[2])) {
+                        regionNames.push(row[2]);
+                    }
+                }
+            });
+            regionNames.sort((a, b) => a.localeCompare(b, 'th'));
+
+            let sel = document.getElementById('select-region-allLevelsSimple');
+            if (sel) {
+                let currentVal = sel.value;
+                sel.innerHTML = '<option value="">ทุกสังกัดภาค</option>';
+                regionNames.forEach(regName => {
+                    let opt = document.createElement('option');
+                    opt.value = regName;
+                    opt.textContent = regName;
+                    sel.appendChild(opt);
+                });
+                sel.value = currentVal;
+            }
+        }
+
+        function processData(data) {
+            if (!data) return;
+            globalLatestData = data;
+            
+            let summary = data.summary || {};
+            let rows = data.rows || [];
+
+            populateRegionDropdowns(rows);
+
+            let rawDate = summary.dateColumnHeader || '';
+            let formattedDate = formatThaiDate(rawDate);
+            let formattedShortDate = formatShortThaiDate(rawDate);
+
+            const sidebarDateEl = document.getElementById('sidebar-date');
+            if (sidebarDateEl) sidebarDateEl.innerText = formattedDate;
+
+            const gaugeTitleEl = document.getElementById('gauge-title-date');
+            if (gaugeTitleEl) gaugeTitleEl.innerText = `วันที่ ${formattedDate}`;
+            
+            let titleText = `สรุปผลงานฝ่ายฯ 98 ( ${formattedShortDate} )`;
+
+            const allSimpleTitleEl = document.getElementById('alllevels-simple-table-title');
+            if (allSimpleTitleEl) allSimpleTitleEl.innerText = titleText;
+           
+            i2Val = cleanNumber(summary.i2);
+            j2Val = cleanNumber(summary.j2);
+            
+            let summaryRowFromData = rows.find(r => r[0] === "ฝ่าย");
+            k2Val = cleanNumber(summary.k2);
+            if (k2Val === 0 && summaryRowFromData && summaryRowFromData[10] !== undefined) {
+                k2Val = cleanNumber(summaryRowFromData[10]);
+            }
+
+            m2Val = cleanNumber(summary.m2);
+            n2Val = cleanNumber(summary.n2);
+
+            const valI2 = document.getElementById('val-i2');
+            if (valI2) valI2.innerText = i2Val.toLocaleString();
+
+            const valJ2 = document.getElementById('val-j2');
+            if (valJ2) valJ2.innerText = j2Val.toLocaleString();
+
+            const valK2 = document.getElementById('val-k2');
+            if (valK2) valK2.innerText = k2Val.toLocaleString();
+
+            const valM2 = document.getElementById('val-m2');
+            if (valM2) valM2.innerText = m2Val.toLocaleString();
+
+            const valN2 = document.getElementById('val-n2');
+            if (valN2) valN2.innerText = n2Val.toFixed(2) + '%';
+
+            const valI2Gauge = document.getElementById('val-i2-gauge');
+            if (valI2Gauge) valI2Gauge.innerText = i2Val.toLocaleString();
+
+            if (gaugeChartInstance) gaugeChartInstance.destroy();
+
+            let activeColor = n2Val > 100 ? '#253487' : (n2Val < 55 ? '#E42113' : '#047dc2');
+            let inactiveColor = '#e5e7eb';
+
+            const gaugeNeedlePlugin = {
+                id: 'gaugeNeedle',
+                afterDatasetDraw(chart) {
+                    const { ctx } = chart;
+                    const datasetMeta = chart.getDatasetMeta(0);
+                    if (!datasetMeta || datasetMeta.data.length === 0) return;
+                    
+                    const element = datasetMeta.data[0];
+                    const cx = element.x;
+                    const cy = element.y;
+                    const innerR = element.innerRadius;
+                    const outerR = element.outerRadius;
+                    
+                    let clampedVal = Math.min(Math.max(n2Val, 0), 100);
+                    let angle = Math.PI + (clampedVal / 100) * Math.PI;
+
+                    ctx.save();
+                    ctx.translate(cx, cy);
+                    ctx.rotate(angle);
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(innerR, -0);
+                    ctx.lineTo(outerR, -0);
+                    ctx.lineTo(outerR, 0);
+                    ctx.lineTo(innerR, 0);
+                    ctx.closePath();
+                    
+                    ctx.fillStyle = '#fff';
+                    ctx.fill();
+                    ctx.restore();
+                }
+            };
+
+            const gaugeChartEl = document.getElementById('gaugeChart');
+            if (gaugeChartEl) {
+                gaugeChartInstance = new Chart(gaugeChartEl.getContext('2d'), {
+                    type: 'doughnut',
+                    data: { 
+                        datasets: [{ 
+                            data: [Math.min(n2Val, 100), Math.max(0, 100 - Math.min(n2Val, 100))], 
+                            backgroundColor: [activeColor, inactiveColor], 
+                            borderWidth: 0 
+                        }] 
+                    },
+                    options: { 
+                        circumference: 180, 
+                        rotation: 270, 
+                        cutout: '75%', 
+                        plugins: { 
+                            legend: { display: false }, 
+                            tooltip: { enabled: false } 
+                        } 
+                    },
+                    plugins: [gaugeNeedlePlugin]
+                });
+            }
+
+            let pieMap = {};
+            let pieTotal = 0;
+            rows.forEach(row => {
+                let position = row[0]; 
+                let name = row[2]; 
+                let premium = cleanNumber(row[8]); 
+                if((position === "ภาค" || position === "ภาค(GL)") && name) {
+                    pieMap[name] = (pieMap[name] || 0) + premium;
+                    pieTotal += premium;
+                }
+            });
+
+            let sortedPie = Object.entries(pieMap).sort((a,b) => b[1] - a[1]);
+            let pieColors = ['#1e3a8a', '#047dc2', '#3b82f6', '#60a5fa', '#93c5fd', '#bfdbfe'];
+
+            if (pieChartInstance) pieChartInstance.destroy();
+            const pieChartEl = document.getElementById('pieChart');
+            if (pieChartEl) {
+                pieChartInstance = new Chart(pieChartEl.getContext('2d'), {
+                    type: 'pie',
+                    data: {
+                        labels: sortedPie.map(item => item[0]),
+                        datasets: [{ data: sortedPie.map(item => item[1]), backgroundColor: pieColors }]
+                    },
+                    options: { plugins: { legend: { display: false } } }
+                });
+            }
+
+            let legendContainer = document.getElementById('pie-legend-custom');
+            if (legendContainer) {
+                legendContainer.innerHTML = '';
+                sortedPie.forEach((item, index) => {
+                    let val = item[1];
+                    let pct = pieTotal > 0 ? ((val / pieTotal) * 100).toFixed(1) + '%' : '0.0%';
+                    let name = item[0];
+                    let color = pieColors[index % pieColors.length];
+                    let itemDiv = document.createElement('div');
+                    itemDiv.className = 'flex items-center space-x-2 truncate';
+                    itemDiv.innerHTML = `
+                        <span class="w-3 h-3 rounded-full flex-shrink-0" style="background-color: ${color};"></span>
+                        <span class="font-semibold text-gray-800 flex-shrink-0">${pct}</span>
+                        <span class="text-gray-700 truncate" title="${name}">${name}</span>
+                    `;
+                    legendContainer.appendChild(itemDiv);
+                });
+            }
+
+            buildAllLevelsTable(rows, i2Val, n2Val, data);
+
+            function renderFilteredTable(containerId, targetPositions, valueIndex, color, limit, minThreshold) {
+                let containerEl = document.getElementById(containerId);
+                if (!containerEl) return;
+
+                let mapData = {};
+                rows.forEach(row => {
+                    let position = row[0]; 
+                    let name = row[2];     
+                    let val = cleanNumber(row[valueIndex]); 
+                    let isMatch = Array.isArray(targetPositions) ? targetPositions.includes(position) : position === targetPositions;
+                    if(isMatch && name) { mapData[name] = (mapData[name] || 0) + val; }
+                });
+                let sorted = Object.entries(mapData).sort((a,b) => b[1] - a[1]).slice(0, limit);
+                let maxVal = sorted.length > 0 ? Math.max(...sorted.map(i => i[1])) : 1;
+                if (maxVal === 0) maxVal = 1;
+
+                let html = `<table class="w-full text-sm"><tbody class="divide-y divide-gray-100">`;
+
+                if (sorted.length === 0) {
+                    html += `<tr><td colspan="4" class="text-center py-3 text-gray-400">ไม่มีข้อมูล</td></tr>`;
+                } else {
+                    sorted.forEach((item, index) => {
+                        let rank = index + 1;
+                        let fullName = item[0];
+                        let firstName = getFirstName(fullName);
+                        let val = item[1];
+                        let pct = (val / maxVal) * 100;
+
+                        let isCommissionCol = (valueIndex === 7);
+                        let valColorClass = "text-gray-700 font-semibold";
+                        let barColor = color;
+
+                        if (isCommissionCol && minThreshold !== undefined && val < minThreshold) {
+                            valColorClass = "text-red-600 font-bold";
+                            barColor = "rgba(39, 52, 130, 0.5)"; 
+                        }
+
+                        html += `
+                            <tr class="hover:bg-gray-50">
+                                <td class="py-2.5 px-1 text-center font-bold text-gray-500">${rank}</td>
+                                <td class="py-2.5 pr-2 font-medium text-gray-800 truncate" title="${fullName}">${firstName}</td>
+                                <td class="py-2.5 px-2 text-right ${valColorClass}">${val.toLocaleString()}</td>
+                                <td class="py-2.5 pl-3 w-1/2">
+                                    <div class="flex items-center space-x-2 w-full">
+                                        <div class="w-full bg-gray-100 rounded-full h-3 overflow-hidden">
+                                            <div class="h-3 rounded-full" style="width: ${pct}%; background-color: ${barColor};"></div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                }
+
+                html += `</tbody></table>`;
+                containerEl.innerHTML = html;
+            }
+
+            renderFilteredTable('table-regionPremium', ['ภาค', 'ภาค(GL)'], 8, '#047dc2', 3, undefined);
+            renderFilteredTable('table-regionCommission', ['ภาค', 'ภาค(GL)'], 7, '#273482', 3, 60000);   
+            renderFilteredTable('table-centerPremium', 'ศูนย์', 8, '#047dc2', 5, undefined);
+            renderFilteredTable('table-centerCommission', 'ศูนย์', 7, '#273482', 5, 15000);  
+            renderFilteredTable('table-unitPremium', 'หน่วย', 8, '#047dc2', 10, undefined);
+            renderFilteredTable('table-unitCommission', 'หน่วย', 7, '#273482', 10, 2500);
+        }
+
+        function loadReport() {
+            try {
+                const cachedRaw = localStorage.getItem(CACHE_KEY);
+                if (cachedRaw) {
+                    processData(JSON.parse(cachedRaw));
+                }
+            } catch (e) {
+                console.error('Error reading cache:', e);
+            }
+
+            fetchAllData(false)
+                .then(data => {
+                    processData(data);
+                    try {
+                        localStorage.setItem(CACHE_KEY, JSON.stringify(data));
+                    } catch (e) {
+                        console.error('Error saving cache:', e);
+                    }
+                })
+                .catch(err => console.error('Error loading data:', err));
+        }
+
+        loadReport();
+
+        function reloadData() {
+            const btn = document.getElementById('btn-reload');
+            const icon = document.getElementById('reload-icon');
+            const label = document.getElementById('reload-label');
+
+            if (btn.disabled) return;
+
+            btn.disabled = true;
+            btn.classList.add('opacity-60', 'cursor-not-allowed');
+            icon.classList.add('animate-spin');
+            label.innerText = 'กำลังโหลด...';
+
+            fetchAllData(true)
+                .then(data => {
+                    processData(data);
+                    try {
+                        localStorage.setItem(CACHE_KEY, JSON.stringify(data));
+                    } catch (e) {
+                        console.error('Error saving cache:', e);
+                    }
+                    label.innerText = 'อัปเดตแล้ว';
+                })
+                .catch(err => {
+                    console.error('Error reloading:', err);
+                    label.innerText = 'โหลดไม่สำเร็จ';
+                })
+                .finally(() => {
+                    icon.classList.remove('animate-spin');
+                    setTimeout(() => {
+                        label.innerText = 'Reload';
+                        btn.disabled = false;
+                        btn.classList.remove('opacity-60', 'cursor-not-allowed');
+                    }, 1500);
+                });
+        }
+
+        function handleFilterChange(tabType) {
+            if (!globalLatestData) return;
+            let rows = globalLatestData.rows || [];
+            let summary = globalLatestData.summary || {};
+            let sI2 = cleanNumber(summary.i2);
+            let sN2 = cleanNumber(summary.n2);
+
+            let selectedRegion = document.getElementById('select-region-allLevelsSimple').value;
+            let searchVal = document.getElementById('search-allLevelsSimple').value.toLowerCase().trim();
+            let checkboxes = document.querySelectorAll('.al-filter-chk');
+            let allowedPos = { region: true };
+            checkboxes.forEach(chk => { if (chk.checked) allowedPos[chk.value] = true; });
+            buildAllLevelsTable(rows, sI2, sN2, globalLatestData, searchVal, allowedPos, selectedRegion);
+        }
+
+        function buildAllLevelsTable(rows, summaryI2, summaryN2, dataObj, searchKeyword = '', allowedPositions = null, selectedRegion = '') {
+            const allSimpleThead = document.getElementById('alllevels-simple-table-head');
+            const allSimpleTbody = document.getElementById('alllevels-simple-table-body');
+
+            if (!allSimpleThead || !allSimpleTbody) return;
+
+            if (!allowedPositions) {
+                allowedPositions = { region: true, center: true, unit: true, agent: true };
+            } else {
+                allowedPositions.region = true;
+            }
+
+            const simpleFrag = document.createDocumentFragment();
+
+            let summaryRowFromData = rows.find(r => r[0] === "ฝ่าย");
+            let rawPVal = summaryRowFromData ? summaryRowFromData[15] : (dataObj && dataObj.summary ? dataObj.summary.p2 : undefined);
+            let hasPCol = rawPVal !== undefined && rawPVal !== null && String(rawPVal).trim() !== '';
+            let summaryPVal = formatComplianceCell('division', rawPVal);
+
+            let colNameWidth = hasPCol ? 'w-[22%]' : 'w-[25%]';
+            let colPWidth = hasPCol ? `<th rowspan="2" class="py-3 px-2 w-[7%] align-middle border-l border-blue-900/40">ผลบังคับ</th>` : '';
+
+            const theadHtml = `
+                <tr class="bg-[#0b2265] text-white text-center align-middle">
+                    <th rowspan="2" class="py-3 px-3 ${colNameWidth} align-middle border-r border-blue-900/40">ชื่อ สกุล</th>
+                    <th colspan="2" class="py-2 px-2 border-r border-blue-900/40">ผลงาน</th>
+                    <th colspan="4" class="py-2 px-2 border-r border-blue-900/40">บริหารหน่วย</th>
+                    <th colspan="4" class="py-2 px-2">บริหารศูนย์</th>
+                    ${colPWidth}
+                </tr>
+                <tr class="bg-[#0b2265] text-white text-center text-xs align-middle">
+                    <th class="py-2 px-5 border-t border-blue-900/40 text-right">เบี้ยปีแรก</th>
+                    <th class="py-2 px-5 border-t border-blue-900/40 border-r border-blue-900/40 text-right">คอมมิชชั่น</th>
+                    <th class="py-2 px-2 border-t border-blue-900/40">มี</th>
+                    <th class="py-2 px-2 border-t border-blue-900/40">เต็ม</th>
+                    <th class="py-2 px-2 border-t border-blue-900/40">ตก</th>
+                    <th class="py-2 px-2 border-t border-blue-900/40 border-r border-blue-900/40">เต็มโควต้า</th>
+                    <th class="py-2 px-2 border-t border-blue-900/40">มี</th>
+                    <th class="py-2 px-2 border-t border-blue-900/40">เต็ม</th>
+                    <th class="py-2 px-2 border-t border-blue-900/40">ตก</th>
+                    <th class="py-2 px-2 border-t border-blue-900/40">เต็มโควต้า</th>
+                </tr>
+            `;
+            if (allSimpleThead) allSimpleThead.innerHTML = theadHtml;
+
+            let regions = [];
+            let allUnits = [], allCenters = [], allAgents = [];
+            let unitsByRegion = new Map(), centersByRegion = new Map();
+            let unitsByCenter = new Map(), agentsByUnit = new Map();
+
+            for (const r of rows) {
+                const pos = r[0];
+                if (pos === "ภาค" || pos === "ภาค(GL)") {
+                    regions.push(r);
+                } else if (pos === "ศูนย์") {
+                    allCenters.push(r);
+                    const key = r[4];
+                    if (!centersByRegion.has(key)) centersByRegion.set(key, []);
+                    centersByRegion.get(key).push(r);
+                } else if (pos === "หน่วย") {
+                    allUnits.push(r);
+                    const regKey = r[4];
+                    if (!unitsByRegion.has(regKey)) unitsByRegion.set(regKey, []);
+                    unitsByRegion.get(regKey).push(r);
+                    const cenKey = r[5];
+                    if (!unitsByCenter.has(cenKey)) unitsByCenter.set(cenKey, []);
+                    unitsByCenter.get(cenKey).push(r);
+                } else if (pos === "ตัวแทน") {
+                    allAgents.push(r);
+                    const key = r[6];
+                    if (!agentsByUnit.has(key)) agentsByUnit.set(key, []);
+                    agentsByUnit.get(key).push(r);
+                }
+            }
+
+            let totalCommissionSummary = regions.reduce((sum, reg) => sum + cleanNumber(reg[7]), 0);
+
+            let totalUnitMe = allUnits.length;
+            let totalUnitTem = allUnits.filter(r => cleanNumber(r[7]) >= 2500).length;
+            let totalUnitTok = totalUnitMe - totalUnitTem;
+            let totalUnitPct = totalUnitMe > 0 ? ((totalUnitTem / totalUnitMe) * 100).toFixed(1) + '%' : '0.0%';
+
+            let totalCenMe = allCenters.length;
+            let totalCenTem = allCenters.filter(r => cleanNumber(r[7]) >= 15000).length;
+            let totalCenTok = totalCenMe - totalCenTem;
+            let totalCenPct = totalCenMe > 0 ? ((totalCenTem / totalCenMe) * 100).toFixed(1) + '%' : '0.0%';
+
+            let summaryPCellSimple = hasPCol ? `<td class="py-3 px-2 text-center">${summaryPVal}</td>` : '';
+            const simpleSummaryTrHtml = `
+                <td class="py-3 px-3 text-left name-cell">ผลงานรวมฝ่าย ${summaryN2.toFixed(2)}%</td>
+                <td class="py-3 px-2 text-right num"><span class="pill ${summaryI2 < (m2Val * 0.55) ? 'pill-warn' : 'pill-ok'}">${summaryI2.toLocaleString()}</span></td>
+                <td class="py-2.5 px-2 text-right">${totalCommissionSummary.toLocaleString()}</td>
+                <td class="py-3 px-2 text-center num">${totalUnitMe}</td>
+                <td class="py-3 px-2 text-center num">${totalUnitTem}</td>
+                <td class="py-3 px-2 text-center"><span class="pill ${totalUnitTok > 0 ? 'pill-red' : ''}">${totalUnitTok}</span></td>
+                <td class="py-3 px-2 text-center"><span class="pill ${parseFloat(totalUnitPct) < 40 ? 'pill-warn' : 'pill-ok'}">${totalUnitPct}</span></td>
+                <td class="py-3 px-2 text-center num">${totalCenMe}</td>
+                <td class="py-3 px-2 text-center num">${totalCenTem}</td>
+                <td class="py-3 px-2 text-center"><span class="pill ${totalCenTok > 0 ? 'pill-red' : ''}">${totalCenTok}</span></td>
+                <td class="py-3 px-2 text-center"><span class="pill ${parseFloat(totalCenPct) < 40 ? 'pill-red' : 'pill-ok'}">${totalCenPct}</span></td>
+                ${summaryPCellSimple}
+            `;
+            
+            const makeRow = (className, html) => {
+                const tr = document.createElement('tr');
+                tr.className = className;
+                tr.innerHTML = html;
+                return tr;
+            };
+
+            let matchSummary = !selectedRegion && (!searchKeyword || "ฝ่าย".includes(searchKeyword));
+            if (matchSummary) {
+                if (allSimpleTbody) simpleFrag.appendChild(makeRow('lvl-summary text-center', simpleSummaryTrHtml));
+            }
+
+            regions.sort((a, b) => cleanNumber(b[8]) - cleanNumber(a[8]));
+
+            regions.forEach((reg) => {
+                let regName = reg[2];
+
+                if (selectedRegion && regName !== selectedRegion) {
+                    return;
+                }
+
+                let regPrem = cleanNumber(reg[8]);
+                let regComm = cleanNumber(reg[7]);
+                let regPVal = formatComplianceCell('region', reg[15]);
+
+                let centers = (centersByRegion.get(regName) || []).slice();
+                let cenMe = centers.length;
+                let cenTem = centers.filter(r => cleanNumber(r[7]) >= 15000).length;
+                let cenTok = cenMe - cenTem;
+                let cenPct = cenMe > 0 ? ((cenTem / cenMe) * 100).toFixed(1) + '%' : '0.0%';
+
+                let unitsInReg = unitsByRegion.get(regName) || [];
+                let unitMe = unitsInReg.length;
+                let unitTem = unitsInReg.filter(r => cleanNumber(r[7]) >= 2500).length;
+                let unitTok = unitMe - unitTem;
+                let unitPct = unitMe > 0 ? ((unitTem / unitMe) * 100).toFixed(1) + '%' : '0.0%';
+
+                let regPCellSimple = hasPCol ? `<td class="py-3 px-2 text-center">${regPVal}</td>` : '';
+                let regTrHtml = `
+                    <td class="py-3 px-3 text-left name-cell">${regName}</td>
+                    <td class="py-3 px-2 text-right num">${regPrem.toLocaleString()}</td>
+                    <td class="py-2 px-2 text-right num"><span class="pill ${regComm < 60000 ? 'pill-warn' : 'pill-ok'}">${regComm.toLocaleString()}</span></td>
+                    <td class="py-3 px-2 text-center num">${unitMe}</td>
+                    <td class="py-3 px-2 text-center num">${unitTem}</td>
+                    <td class="py-3 px-2 text-center ${unitTok > 0 ? ' text-red-600' : ''}">${unitTok}</td>
+                    <td class="py-3 px-2 text-center"><span class="pill ${parseFloat(unitPct) < 40 ? 'pill-warn' : 'pill-ok'}">${unitPct}</span></td>
+                    <td class="py-3 px-2 text-center num">${cenMe}</td>
+                    <td class="py-3 px-2 text-center num">${cenTem}</td>
+                    <td class="py-3 px-2 text-center ${cenTok > 0 ? ' text-red-600' : ''}">${cenTok}</td>
+                    <td class="py-3 px-2 text-center"><span class="pill ${parseFloat(cenPct) < 40 ? 'pill-red' : 'pill-ok'}">${cenPct}</span></td>
+                    ${regPCellSimple}
+                `;
+                if (allSimpleTbody) simpleFrag.appendChild(makeRow('lvl-region text-center', regTrHtml));
+
+                centers.sort((a, b) => cleanNumber(b[8]) - cleanNumber(a[8]));
+
+                centers.forEach((cen) => {
+                    let cenName = cen[2];
+                    let cenPrem = cleanNumber(cen[8]);
+                    let cenComm = cleanNumber(cen[7]);
+                    let cenPVal = formatComplianceCell('center', cen[15]);
+
+                    let unitsInCen = unitsByCenter.get(cenName) || [];
+                    let cUnitMe = unitsInCen.length;
+                    let cUnitTem = unitsInCen.filter(r => cleanNumber(r[7]) >= 2500).length;
+                    let cUnitTok = cUnitMe - cUnitTem;
+                    let cUnitPct = cUnitMe > 0 ? ((cUnitTem / cUnitMe) * 100).toFixed(1) + '%' : '0.0%';
+
+                    let showCenterRow = allowedPositions.center && (!searchKeyword || String(cenName).toLowerCase().includes(searchKeyword));
+                    
+                    let unitsInCenSorted = unitsInCen.slice().sort((a, b) => cleanNumber(b[7]) - cleanNumber(a[7]));
+                    
+                    unitsInCenSorted.forEach((unit) => {
+                        let unitName = unit[2];
+                        let unitPrem = cleanNumber(unit[8]);
+                        let unitComm = cleanNumber(unit[7]);
+                        let unitPVal = formatComplianceCell('unit', unit[15]);
+
+                        let agentsInUnit = (agentsByUnit.get(unitName) || []).slice()
+                            .sort((a, b) => cleanNumber(b[8]) - cleanNumber(a[8]));
+
+                        let showUnitRow = allowedPositions.unit && (!searchKeyword || String(unitName).toLowerCase().includes(searchKeyword));
+
+                        let filteredAgents = agentsInUnit.filter(agent => {
+                            if (!allowedPositions.agent) return false;
+                            if (!searchKeyword) return true;
+                            let rawAgentName = String(agent[2] || '').toLowerCase();
+                            return rawAgentName.includes(searchKeyword);
+                        });
+
+                        let matchUnitOrAgent = !searchKeyword || String(unitName).toLowerCase().includes(searchKeyword) || filteredAgents.length > 0 || (showCenterRow && String(cenName).toLowerCase().includes(searchKeyword));
+
+                        if (matchUnitOrAgent) {
+                            if (showCenterRow && allSimpleTbody) {
+                                let cenPCellSimple = hasPCol ? `<td class="py-2 px-2 text-center">${cenPVal}</td>` : '';
+                                let cenNote = commissionNote(cenComm, 15000, ' → ค่าจัดงาน 15%', CENTER_INCENTIVE_TIERS);
+                                let cenNoteSimple = cenNote
+                                    ? `<td colspan="4" class="py-2 px-2 text-left"><span class="${cenNote.cls}">${cenNote.text}</span></td>`
+                                    : `<td colspan="4" class="py-2 px-2"></td>`;
+                                let cenSimpleTrHtml = `
+                                    <td class="py-2 px-3 text-left name-cell">${cenName}</td>
+                                    <td class="py-2 px-2 text-right num">${cenPrem.toLocaleString()}</td>
+                                    <td class="py-2 px-2 text-right num"><span class="pill ${cenComm < 15000 ? 'pill-warn' : 'pill-ok'}">${cenComm.toLocaleString()}</span></td>
+                                    <td class="py-2 px-2 text-center num">${cUnitMe}</td>
+                                    <td class="py-2 px-2 text-center num">${cUnitTem}</td>
+                                    <td class="py-2 px-2 text-center ${cUnitTok > 0 ? ' text-red-600' : ''}">${cUnitTok}</td>
+                                    <td class="py-2 px-2 text-center"><span class="pill ${parseFloat(cUnitPct) < 40 ? 'pill-warn' : 'pill-ok'}">${cUnitPct}</span></td>
+                                    ${cenNoteSimple}
+                                    ${cenPCellSimple}
+                                `;
+                                simpleFrag.appendChild(makeRow('lvl-center text-center', cenSimpleTrHtml));
+                                showCenterRow = false; 
+                            }
+
+                            if (showUnitRow && allSimpleTbody) {
+                                let unitPCellSimple = hasPCol ? `<td class="py-2 px-2 text-center">${unitPVal}</td>` : '';
+                                let unitNote = commissionNote(unitComm, 2500, ' → ค่าจัดงาน 15%', UNIT_INCENTIVE_TIERS);
+                                let unitNoteSimple = unitNote
+                                    ? `<td colspan="4" class="py-2 px-2 text-left"><span class="${unitNote.cls}">${unitNote.text}</span></td>`
+                                    : `<td colspan="4" class="py-2 px-2"></td>`;
+                                let unitSimpleTrHtml = `
+                                    <td class="py-2 px-3 text-left name-cell">${unitName}</td>
+                                    <td class="py-2 px-2 text-right num">${unitPrem.toLocaleString()}</td>
+                                    <td class="py-2 px-2 text-right num"><span class="pill ${unitComm < 2500 ? 'pill-warn' : 'pill-ok'}">${unitComm.toLocaleString()}</span></td>
+                                    ${unitNoteSimple}
+                                    <td colspan="4"></td>
+                                    ${unitPCellSimple}
+                                `;
+                                simpleFrag.appendChild(makeRow('lvl-unit text-center', unitSimpleTrHtml));
+                            }
+
+                            filteredAgents.forEach((agent) => {
+                                let rawAgentName = String(agent[2] || '');
+                                let isTrainee = rawAgentName.includes("แนะนำโดย");
+                                let agentName = rawAgentName.replace("แนะนำโดย", "").trim();
+                                let agentPrem = cleanNumber(agent[8]);
+                                let agentComm = cleanNumber(agent[7]);
+
+                                if (allSimpleTbody) {
+                                    let agentPCellSimple = hasPCol ? `<td class="py-1.5 px-2 text-center">-</td>` : '';
+                                    let agentSimpleTrHtml = `
+                                        <td class="py-1.5 px-3 text-left name-cell">${agentName}${isTrainee ? ' <span class="pill pill-neutral">ฝึกหัด</span>' : ''}</td>
+                                        <td class="py-1.5 px-2 text-right num">${agentPrem.toLocaleString()}</td>
+                                        <td class="py-1.5 px-2 text-right num"><span class="pill ${agentComm == 0 ? 'pill-warn' : 'pill-ok'}">${agentComm.toLocaleString()}</span></td>
+                                        <td colspan="8"></td>
+                                        ${agentPCellSimple}
+                                    `;
+                                    simpleFrag.appendChild(makeRow('lvl-agent text-center', agentSimpleTrHtml));
+                                }
+                            });
+                        }
+                    });
+                });
+            });
+
+            if (allSimpleTbody) {
+                allSimpleTbody.innerHTML = '';
+                allSimpleTbody.appendChild(simpleFrag);
+            }
+        }
+    </script>
+</body>
+</html>
