@@ -1,0 +1,5 @@
+streamlit
+pdfplumber
+gspread
+google-auth
+openpyxl
