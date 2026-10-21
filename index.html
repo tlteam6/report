@@ -194,13 +194,20 @@
             </div>
         </div>
         
-        <div class="pt-2 mb-auto">
+        <div class="pt-2 mb-auto space-y-2">
             <button onclick="reloadData()" id="btn-reload" class="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-medium transition-colors text-gray-300 hover:bg-[#273482]/30 border border-white/10">
                 <svg id="reload-icon" class="w-4 h-4 transition-transform duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h5M20 20v-5h-5M4.5 9A7.5 7.5 0 0119 7.5M19.5 15A7.5 7.5 0 015 16.5"/>
                 </svg>
                 <span id="reload-label">Reload</span>
             </button>
+            
+            <a href="https://report-26kak8duf2ewa3hwgfk6fd.streamlit.app/" target="_blank" id="btn-import" class="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-medium transition-colors text-gray-300 hover:bg-[#273482]/30 border border-white/10">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                </svg>
+                <span>Import</span>
+            </a>
         </div>
     </aside>
 
@@ -357,7 +364,6 @@
             let month = parseInt(parts[1], 10);
             let year = parseInt(parts[2], 10);
             
-            // แปลงปี ค.ศ. หรือ พ.ศ. ให้เป็นปี พ.ศ. ย่อ 2 หลัก (เช่น 2026 หรือ 2569 -> 69)
             let shortYear = year;
             if (year > 2500) {
                 shortYear = year - 2500;
@@ -936,7 +942,7 @@
                     <td class="py-3 px-2 text-center num">${cenMe}</td>
                     <td class="py-3 px-2 text-center num">${cenTem}</td>
                     <td class="py-3 px-2 text-center ${cenTok > 0 ? ' text-red-600' : ''}">${cenTok}</td>
-                    <td class="py-3 px-2 text-center"><span class="pill ${parseFloat(cenPct) < 40 ? 'pill-red' : 'pill-ok'}">${cenPct}</span></td>
+                    <td class="py-3 px-2 text-center"><span class="pill ${parseFloat(cenPct) < 40 ? 'pill-warn' : 'pill-ok'}">${cenPct}</span></td>
                     ${regPCellSimple}
                 `;
                 if (allSimpleTbody) simpleFrag.appendChild(makeRow('lvl-region text-center', regTrHtml));
